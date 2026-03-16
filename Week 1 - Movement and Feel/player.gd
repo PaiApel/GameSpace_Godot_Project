@@ -8,6 +8,8 @@ signal ammo_changed(current: int, in_triple: bool)
 signal slowmo_changed(active: bool, cooldown_ratio: float)
 signal triple_changed(active: bool, loaded: int, cooldown_ratio: float)
 signal reload_progress(ratio: float, reloading: bool, triple_mode: bool)
+signal shot_fired()
+signal hit_registered()
 
 # ---------------------------------------------------------------------------
 # Exports
@@ -29,6 +31,11 @@ signal reload_progress(ratio: float, reloading: bool, triple_mode: bool)
 @export var recoil_force: float = 14.0
 @export var reload_time: float = 0.8  # Waktu dalam detik untuk reload satu bullet
 @export var recoil_mode: int = 1  # Recoil force untuk triple shots. 0 = equal, 1 = increasing, 2 = decreasing
+
+# --- Bullet ---
+@export_group("Bullet")
+@export var bullet_scene: PackedScene
+@export var bullet_speed: float = 80.0
 
 # --- Triple Shot Skill ---
 @export_group("Triple Shots Skill")
@@ -74,6 +81,7 @@ var _slowmo_cooldown_timer: float = 0.0
 @onready var _spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var _gun_pivot: Node3D = $GunPivot
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
+@onready var _gun_tip: Marker3D = $GunPivot/MeshInstance3D2/GunTip
 
 # ---------------------------------------------------------------------------
 func _ready() -> void:
@@ -181,6 +189,9 @@ func _try_shoot() -> void:
 	var in_air := not is_on_floor()
 	_bullets -= 1
 	emit_signal("ammo_changed", _bullets, _triple_active)
+	emit_signal("shot_fired")
+	
+	_spawn_bullet()
 	
 	# Recoil hanya saat di udara
 	if in_air:
@@ -201,6 +212,41 @@ func _try_shoot() -> void:
 		_is_reloading = true
 		_reload_timer = reload_time
 		emit_signal("reload_progress", 0.0, true, false)
+
+
+func _spawn_bullet() -> void:
+	if bullet_scene == null:
+		push_warning("Player: bullet_scene not assigned!")
+		return
+	
+	# Raycast dari camera center untuk menemukan posisi crosshair menunjuk
+	# Bullet spawns di gun tip dan mengarah ke posisi crosshair menunjuk
+	var viewport := get_viewport()
+	var screen_center := viewport.get_visible_rect().size * 0.5
+	var ray_origin := _camera.project_ray_origin(screen_center)
+	var ray_target := ray_origin + _camera.project_ray_normal(screen_center) * 1000.0
+	
+	var space := get_world_3d().direct_space_state
+	var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_target)
+	query.exclude = [self]
+	var result := space.intersect_ray(query)
+	
+	var aim_point = result.position if result else ray_target
+	
+	var bullet: Node = bullet_scene.instantiate()
+	# Add ke root agar bullet independent dari player
+	get_tree().root.add_child(bullet)
+	bullet.global_transform = _gun_tip.global_transform
+	
+	# Arah dari gun tip ke aim point
+	var shoot_dir = (aim_point - _gun_tip.global_position).normalized()
+	
+	if bullet.has_method("initialize"):
+		bullet.initialize(shoot_dir, bullet_speed, self)
+
+
+func _on_bullet_hit() -> void:
+	emit_signal("hit_registered")
 
 
 func _get_recoil_strength() -> float:

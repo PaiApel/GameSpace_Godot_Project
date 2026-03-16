@@ -1,0 +1,20 @@
+[gd_scene format=3 uid="uid://cwdsg2va3uhbq"]
+
+[ext_resource type="Script" uid="uid://doxcrmdffk6vn" path="res://Week 2 - Interaction/destructible.gd" id="1_ynvsl"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_h1nkw"]
+size = Vector3(1.2, 1.2, 1.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_qpki1"]
+size = Vector3(1.2, 1.2, 1.2)
+
+[node name="Crate" type="StaticBody3D" unique_id=154054190]
+collision_layer = 2
+collision_mask = 5
+script = ExtResource("1_ynvsl")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=882339201]
+shape = SubResource("BoxShape3D_h1nkw")
+
+[node name="Mesh" type="MeshInstance3D" parent="." unique_id=1315268316]
+mesh = SubResource("BoxMesh_qpki1")

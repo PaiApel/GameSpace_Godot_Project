@@ -2,24 +2,6 @@
 
 [ext_resource type="Script" uid="uid://m26aufrseq6e" path="res://Week 1 - Movement and Feel/hud.gd" id="1_uqsxo"]
 
-[sub_resource type="Gradient" id="Gradient_uqsxo"]
-offsets = PackedFloat32Array(0, 0.44805196, 0.45454547, 0.59090906, 0.5974026, 1)
-colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0.25882354, 0.25882354, 0.25882354, 1, 0.2592937, 0.2592937, 0.2592937, 1, 0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_s733l"]
-gradient = SubResource("Gradient_uqsxo")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-
-[sub_resource type="Gradient" id="Gradient_7mljm"]
-offsets = PackedFloat32Array(0, 0.44805196, 0.45454547, 0.59090906, 0.5974026, 1)
-colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_osnd6"]
-gradient = SubResource("Gradient_7mljm")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-
 [node name="HUD" type="CanvasLayer" unique_id=324772508]
 script = ExtResource("1_uqsxo")
 
@@ -63,50 +45,125 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -10.0
 offset_top = -10.0
-offset_right = 10.0
-offset_bottom = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="ReloadArc" type="TextureProgressBar" parent="Crosshair" unique_id=675109328]
+[node name="Top" type="ColorRect" parent="Crosshair" unique_id=1357941684]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -42.0
-offset_top = -42.0
-offset_right = 22.0
-offset_bottom = 22.0
+offset_left = -1.0
+offset_top = -13.0
+offset_right = 1.0
+offset_bottom = -3.0
 grow_horizontal = 2
 grow_vertical = 2
-value = 100.0
-fill_mode = 4
-texture_under = SubResource("GradientTexture2D_s733l")
-texture_progress = SubResource("GradientTexture2D_osnd6")
+mouse_filter = 2
 
-[node name="H Bar" type="ColorRect" parent="Crosshair" unique_id=1295480528]
-layout_mode = 0
-offset_left = -10.0
-offset_top = -1.0
-offset_right = 10.0
-offset_bottom = 1.0
-color = Color(1, 1, 1, 0.84313726)
-
-[node name="V Bar" type="ColorRect" parent="Crosshair" unique_id=334882416]
-layout_mode = 0
+[node name="Bottom" type="ColorRect" parent="Crosshair" unique_id=1666431268]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
 offset_left = -1.0
-offset_top = -10.0
+offset_top = 4.0
 offset_right = 1.0
-offset_bottom = 10.0
-color = Color(1, 1, 1, 0.84313726)
+offset_bottom = 14.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
-[node name="Dot" type="ColorRect" parent="Crosshair" unique_id=1344758413]
-layout_mode = 0
-offset_left = -2.0
-offset_top = -2.0
-offset_right = 2.0
-offset_bottom = 2.0
-color = Color(1, 0.3019608, 0.3019608, 1)
+[node name="Left" type="ColorRect" parent="Crosshair" unique_id=477454398]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -1.0
+offset_right = -4.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Right" type="ColorRect" parent="Crosshair" unique_id=1372292461]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 4.0
+offset_top = -1.0
+offset_right = 14.0
+offset_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ReloadRing" type="Control" parent="Crosshair" unique_id=1656464778]
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+
+[node name="HitMarker" type="Control" parent="Crosshair" unique_id=408697722]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -20.0
+offset_top = -20.0
+offset_right = 20.0
+offset_bottom = 20.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Diag1" type="ColorRect" parent="Crosshair/HitMarker" unique_id=1542222880]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = -7.0
+offset_right = 1.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = 1.0471976
+pivot_offset_ratio = Vector2(0.5, 0.5)
+mouse_filter = 2
+color = Color(0.7764706, 0, 0, 1)
+
+[node name="Diag2" type="ColorRect" parent="Crosshair/HitMarker" unique_id=1420927732]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = -7.0
+offset_right = 1.0
+offset_bottom = 7.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = -1.0471976
+pivot_offset_ratio = Vector2(0.5, 0.5)
+mouse_filter = 2
+color = Color(0.7764706, 0, 0, 1)
