@@ -10,6 +10,15 @@ signal triple_changed(active: bool, loaded: int, cooldown_ratio: float)
 signal reload_progress(ratio: float, reloading: bool, triple_mode: bool)
 signal shot_fired()
 signal hit_registered()
+signal weapon_changed(weapon: int)
+signal slash_started()
+signal slash_finished()
+signal dash_changed(active: bool, cooldown_ratio: float)
+
+# ---------------------------------------------------------------------------
+# Weapon enum
+# ---------------------------------------------------------------------------
+enum Weapon { GUN, SWORD }
 
 # ---------------------------------------------------------------------------
 # Exports
@@ -43,6 +52,12 @@ signal hit_registered()
 @export var triple_load_time: float = 0.8
 @export var triple_cooldown: float = 6.0
 
+# --- Dash Skill ---
+@export_group("Dash Skill")
+@export var dash_speed: float = 30.0
+@export var dash_duration: float = 0.25
+@export var dash_cooldown: float = 4.0
+
 # --- Slow-Mo ---
 @export_group("Slow-Mo")
 @export var slowmo_time_scale: float = 0.25  
@@ -57,6 +72,7 @@ signal hit_registered()
 # Internal state
 # ---------------------------------------------------------------------------
 var _jump_velocity: float
+var _current_weapon: Weapon = Weapon.GUN
 
 # Bullet state
 var _bullets: int = 1 
@@ -71,6 +87,15 @@ var _triple_load_timer: float = 0.0
 var _triple_window_timer: float = 0.0
 var _triple_cooldown_timer: float = 0.0
 
+# Sword state
+var _is_slashing: bool = false
+
+# Dash state
+var _is_dashing: bool = false
+var _dash_timer: float = 0.0
+var _dash_cooldown_timer: float = 0.0
+var _dash_direction: Vector3 = Vector3.ZERO
+
 # Slow-mo state
 var _slowmo_active: bool = false
 var _slowmo_timer: float = 0.0
@@ -81,12 +106,24 @@ var _slowmo_cooldown_timer: float = 0.0
 @onready var _spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
 @onready var _gun_pivot: Node3D = $GunPivot
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
-@onready var _gun_tip: Marker3D = $GunPivot/MeshInstance3D2/GunTip
+@onready var _gun_tip: Marker3D = $GunPivot/MeshInstance3D/GunTip
+@onready var _sword_pivot: Node3D = $SwordPivot
+@onready var _sword_slash: SwordSlash = $SwordPivot/Blade/SwordHitbox
+@onready var _sword_trail: MeshInstance3D = $SwordPivot/SwordTrail
 
 # ---------------------------------------------------------------------------
 func _ready() -> void:
 	_jump_velocity = sqrt(2.0 * gravity * jump_height)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	
+	if _sword_slash:
+		_sword_slash.initialize(self, _sword_pivot, _sword_trail)
+		_sword_slash.monitoring = false
+	
+	if _gun_pivot:
+		_gun_pivot.visible = true
+	if _sword_pivot:
+		_sword_pivot.visible = false
 
 
 # ---------------------------------------------------------------------------
@@ -101,13 +138,25 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	
-	# Shoot
-	if event.is_action_pressed("shoot"):
-		_try_shoot()
+	# Weapon swap
+	if event.is_action_pressed("swap_weapon"):
+		_swap_weapon()
 	
-	# Triple Shots
-	if event.is_action_pressed("triple_shot"):
-		_try_activate_triple()
+	# Noraml attack
+	if event.is_action_pressed("attack"):
+		match _current_weapon:
+			Weapon.GUN:
+				_try_shoot()
+			Weapon.SWORD:
+				_try_slash()
+	
+	# Weapon skills
+	if event.is_action_pressed("activate_skill"):
+		match _current_weapon:
+			Weapon.GUN:
+				_try_activate_triple()
+			Weapon.SWORD:
+				_try_activate_dash()
 	
 	# Slow-mo
 	if event.is_action_pressed("slowmo"):
@@ -122,18 +171,64 @@ func _physics_process(delta: float) -> void:
 	_update_slowmo(real_delta)
 	_update_reload(real_delta)
 	_update_triple(real_delta)
+	_update_dash(real_delta)
 	
 	# Gravity pake Engine.time_scale, biar bisa melambat saat slow-mo
 	_apply_gravity(delta)
 	_handle_jump()
 	_handle_movement(delta)
-	_sync_gun_aim()
+	_sync_aim()
 	
 	# Reset air shot counter saat landing
 	if is_on_floor():
 		_shots_fired_in_air = 0
 	
 	move_and_slide()
+
+
+# ---------------------------------------------------------------------------
+# Weapon swap
+# ---------------------------------------------------------------------------
+func _swap_weapon() -> void:
+	if _is_slashing or _is_dashing:
+		return
+	if _triple_active and _triple_loaded < 3:
+		return
+	
+	if _current_weapon == Weapon.GUN:
+		_current_weapon = Weapon.SWORD
+		_gun_pivot.visible = false
+		_sword_pivot.visible = true
+		if _is_reloading:
+			_is_reloading = false
+			emit_signal("reload_progress", 0.0, false, false)
+		emit_signal("weapon_changed", _current_weapon)
+		if _is_dashing:
+			emit_signal("dash_changed", true, 0.0)
+		elif _dash_cooldown_timer > 0.0:
+			emit_signal("dash_changed", false, _dash_cooldown_timer / dash_cooldown)
+		else:
+			emit_signal("dash_changed", false, 1.0)
+	else:
+		_current_weapon = Weapon.GUN
+		_gun_pivot.visible = true
+		_sword_pivot.visible = false
+		if _sword_slash:
+			_sword_slash.reset_combo()
+		emit_signal("weapon_changed", _current_weapon)
+		if _bullets > 0:
+			emit_signal("ammo_changed", _bullets, false)
+		else:
+			_is_reloading = true
+			_reload_timer = reload_time
+			emit_signal("ammo_changed", 0, false)
+			emit_signal("reload_progress", 0.0, true, false)
+		if _triple_active:
+			emit_signal("triple_changed", true, _triple_loaded, 1.0)
+		elif _triple_cooldown_timer > 0.0:
+			emit_signal("triple_changed", false, 0, _triple_cooldown_timer / triple_cooldown)
+		else:
+			emit_signal("triple_changed", false, 0, 1.0)
 
 
 # ---------------------------------------------------------------------------
@@ -173,10 +268,11 @@ func _handle_movement(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 
 
-# Senapan nunjuk ke arah camera menghadap
-func _sync_gun_aim() -> void:
+func _sync_aim() -> void:
 	if _gun_pivot:
 		_gun_pivot.rotation.x = _camera_pivot.rotation.x
+	if _sword_pivot and not _is_slashing:
+		_sword_pivot.rotation.x = _camera_pivot.rotation.x
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +280,8 @@ func _sync_gun_aim() -> void:
 # ---------------------------------------------------------------------------
 func _try_shoot() -> void:
 	if _bullets <= 0:
+		return
+	if _triple_active and _triple_loaded < 3:
 		return
 	
 	var in_air := not is_on_floor()
@@ -245,7 +343,7 @@ func _spawn_bullet() -> void:
 		bullet.initialize(shoot_dir, bullet_speed, self)
 
 
-func _on_bullet_hit() -> void:
+func _on_hit() -> void:
 	emit_signal("hit_registered")
 
 
@@ -284,10 +382,7 @@ func _update_reload(real_delta: float) -> void:
 # Player harus menembak ketiga bullets dalam kurun triple_active_duration atau skill akan expired.
 # ---------------------------------------------------------------------------
 func _try_activate_triple() -> void:
-	if _triple_active:
-		return
-	
-	if _triple_cooldown_timer > 0.0:
+	if _triple_active or _triple_cooldown_timer > 0.0:
 		return
 	
 	_triple_active = true
@@ -305,7 +400,11 @@ func _update_triple(real_delta: float) -> void:
 	if not _triple_active:
 		if _triple_cooldown_timer > 0.0:
 			_triple_cooldown_timer -= real_delta
-			emit_signal("triple_changed", false, 0, _triple_cooldown_timer / triple_cooldown)
+			if _triple_cooldown_timer <= 0.0:
+				_triple_cooldown_timer = 0.0
+				emit_signal("triple_changed", false, 0, 1.0)
+			else:
+				emit_signal("triple_changed", false, 0, _triple_cooldown_timer / triple_cooldown)
 		return
 	
 	# Count down fire window
@@ -344,6 +443,74 @@ func _end_triple() -> void:
 
 
 # ---------------------------------------------------------------------------
+# Sword Slash
+# ---------------------------------------------------------------------------
+func _try_slash() -> void:
+	if _is_slashing and not (_sword_slash and _sword_slash.is_in_combo()):
+		return
+	
+	if _sword_slash.try_activate():
+		_is_slashing = true
+		emit_signal("slash_started")
+ 
+ 
+func _on_slash_finished() -> void:
+	_is_slashing = false
+	emit_signal("slash_finished")
+
+
+# ---------------------------------------------------------------------------
+# Dash Skill
+# ---------------------------------------------------------------------------
+func _try_activate_dash() -> void:
+	if _is_dashing or _dash_cooldown_timer > 0.0:
+		return
+	
+	_dash_direction = -transform.basis.z
+	_dash_direction.y = 0.0
+	_dash_direction = _dash_direction.normalized()
+	
+	_is_dashing = true
+	_dash_timer = dash_duration
+	
+	# Remove layer 2 from collision mask so player passes through Destructibles
+	collision_mask = collision_mask & ~(1 << 3)  # Clear bit 1 (layer 2)
+	
+	if _sword_slash:
+		_sword_slash.try_activate()
+	
+	emit_signal("dash_changed", true, 0.0)
+ 
+ 
+func _update_dash(real_delta: float) -> void:
+	if not _is_dashing:
+		if _dash_cooldown_timer > 0.0:
+			_dash_cooldown_timer -= real_delta
+			if _dash_cooldown_timer <= 0.0:
+				_dash_cooldown_timer = 0.0
+				emit_signal("dash_changed", false, 1.0)
+			else:
+				emit_signal("dash_changed", false, _dash_cooldown_timer / dash_cooldown)
+		return
+	
+	_dash_timer -= real_delta / Engine.time_scale
+	if _dash_timer <= 0.0:
+		_end_dash()
+		return
+	
+	velocity.x = _dash_direction.x * dash_speed
+	velocity.z = _dash_direction.z * dash_speed
+ 
+ 
+func _end_dash() -> void:
+	_is_dashing = false
+	_dash_cooldown_timer = dash_cooldown
+	# Restore layer 2 collision so player hits Destructibles again
+	collision_mask = collision_mask | (1 << 3)
+	emit_signal("dash_changed", false, 1.0)
+
+
+# ---------------------------------------------------------------------------
 # Slow-Mo
 # ---------------------------------------------------------------------------
 func _try_activate_slowmo() -> void:
@@ -363,7 +530,11 @@ func _update_slowmo(real_delta: float) -> void:
 			_end_slowmo()
 	elif _slowmo_cooldown_timer > 0.0:
 		_slowmo_cooldown_timer -= real_delta
-		emit_signal("slowmo_changed", false, _slowmo_cooldown_timer / slowmo_cooldown)
+		if _slowmo_cooldown_timer <= 0.0:
+			_slowmo_cooldown_timer = 0.0
+			emit_signal("slowmo_changed", false, 1.0)
+		else:
+			emit_signal("slowmo_changed", false, _slowmo_cooldown_timer / slowmo_cooldown)
 
 
 func _end_slowmo() -> void:

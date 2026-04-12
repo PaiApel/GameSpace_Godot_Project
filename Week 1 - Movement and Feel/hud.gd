@@ -5,6 +5,7 @@ extends CanvasLayer
 @onready var triple_cooldown_bar: ProgressBar = $MarginContainer/VBoxContainer/TripleCooldownBar
 @onready var slowmo_label: Label = $MarginContainer/VBoxContainer/SlowMoLabel
 @onready var slowmo_cooldown_bar: ProgressBar = $MarginContainer/VBoxContainer/SlowMoCooldownBar
+@onready var weapon_label: Label = $MarginContainer/VBoxContainer/WeaponLabel
 
 @onready var _reload_ring: Control = $Crosshair/ReloadRing
 
@@ -33,6 +34,8 @@ var _current_gap: float = CROSSHAIR_REST_GAP   # Live gap value, tweened
 var _tween_expand: Tween = null
 var _tween_hit:    Tween = null
 
+var _current_weapon: int = 0
+
 func _ready() -> void:
 	var player: Player = get_tree().get_first_node_in_group("player")
 	if player:
@@ -42,6 +45,10 @@ func _ready() -> void:
 		player.reload_progress.connect(_on_reload_progress)
 		player.shot_fired.connect(_on_shot_fired)
 		player.hit_registered.connect(_on_hit_registered)
+		player.weapon_changed.connect(_on_weapon_changed)
+		player.slash_started.connect(_on_slash_started)
+		player.slash_finished.connect(_on_slash_finished)
+		player.dash_changed.connect(_on_dash_changed)
 	else:
 		push_warning("HUD: No node found in group 'player'")
 	
@@ -53,6 +60,7 @@ func _ready() -> void:
 	triple_cooldown_bar.max_value = 1.0
 	slowmo_cooldown_bar.value = 1.0
 	slowmo_cooldown_bar.max_value = 1.0
+	weapon_label.text = "WEAPON: GUN"
 	
 	_hit_marker.visible = false
 	_hit_marker.modulate.a = 0.0
@@ -64,7 +72,6 @@ func _ready() -> void:
 	# Center the ring on the crosshair
 	_reload_ring.position = Vector2(-RING_SIZE * 0.5, -RING_SIZE * 0.5)
 	_reload_ring.draw.connect(_draw_ring)
-	call_deferred("_setup_ring")
  
 	# Crosshair gap — defer so ColorRect sizes are finalised
 	call_deferred("_apply_gap", CROSSHAIR_REST_GAP)
@@ -167,6 +174,9 @@ func _on_reload_progress(ratio: float, reloading: bool, triple_mode: bool) -> vo
 # Ammo
 # ---------------------------------------------------------------------------
 func _on_ammo_changed(current: int, in_triple: bool) -> void:
+	if _current_weapon == 1:
+		ammo_label.text = "AMMO: —"
+		return
 	if in_triple:
 		ammo_label.text = "AMMO: %d / 3  [TRIPLE]" % current
 	else:
@@ -174,15 +184,45 @@ func _on_ammo_changed(current: int, in_triple: bool) -> void:
 
 
 # ---------------------------------------------------------------------------
+# Weapon changed
+# ---------------------------------------------------------------------------
+func _on_weapon_changed(weapon: int) -> void:
+	_current_weapon = weapon
+	if weapon == 0:
+		weapon_label.text = "WEAPON: GUN"
+		weapon_label.modulate = Color.WHITE
+	else:
+		weapon_label.text = "WEAPON: SWORD"
+		weapon_label.modulate = Color.CYAN
+		ammo_label.text = "AMMO: —"
+		_reload_ring.visible = false
+ 
+ 
+# ---------------------------------------------------------------------------
+# Slash state
+# ---------------------------------------------------------------------------
+func _on_slash_started() -> void:
+	weapon_label.text = "WEAPON: SWORD [SLASHING]"
+	weapon_label.modulate = Color.YELLOW
+ 
+ 
+func _on_slash_finished() -> void:
+	weapon_label.text = "WEAPON: SWORD"
+	weapon_label.modulate = Color.CYAN
+
+
+# ---------------------------------------------------------------------------
 # Triple
 # ---------------------------------------------------------------------------
 func _on_triple_changed(active: bool, loaded: int, cooldown_ratio: float) -> void:
+	if _current_weapon != 0:
+		return
 	if active and loaded < 3:
 		triple_label.text = "TRIPLE: loading %d/3" % loaded
 		triple_label.modulate = Color.YELLOW
 		triple_cooldown_bar.value = 1.0
 	elif loaded >= 3:
-		triple_label.text = "TRIPLE: READY TO SHOOT" % loaded
+		triple_label.text = "TRIPLE: READY TO SHOOT"
 		triple_label.modulate = Color.RED
 		triple_cooldown_bar.value = 1.0
 	elif cooldown_ratio >= 1.0:
@@ -191,6 +231,26 @@ func _on_triple_changed(active: bool, loaded: int, cooldown_ratio: float) -> voi
 		triple_cooldown_bar.value = 1.0
 	else:
 		triple_label.text = "TRIPLE: cooldown"
+		triple_label.modulate = Color.GRAY
+		triple_cooldown_bar.value = cooldown_ratio
+
+
+# ---------------------------------------------------------------------------
+# Dash
+# ---------------------------------------------------------------------------
+func _on_dash_changed(active: bool, cooldown_ratio: float) -> void:
+	if _current_weapon != 1:
+		return
+	if active:
+		triple_label.text = "DASH: ACTIVE"
+		triple_label.modulate = Color.YELLOW
+		triple_cooldown_bar.value = 1.0
+	elif cooldown_ratio >= 1.0 or cooldown_ratio == 0.0:
+		triple_label.text = "DASH: READY"
+		triple_label.modulate = Color.WHITE
+		triple_cooldown_bar.value = 1.0
+	else:
+		triple_label.text = "DASH: cooldown"
 		triple_label.modulate = Color.GRAY
 		triple_cooldown_bar.value = cooldown_ratio
 

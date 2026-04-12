@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" uid="uid://5g6mo81ykk75" path="res://Week 1 - Movement and Feel/player.gd" id="1_4s3wv"]
 [ext_resource type="PackedScene" uid="uid://dttf5ppgbg6k8" path="res://Week 2 - Interaction/bullet.tscn" id="2_7kpeh"]
+[ext_resource type="Script" uid="uid://m2txcc6n7hyd" path="res://Week 3 - Combat/sword_slash.gd" id="3_polb7"]
+[ext_resource type="Script" uid="uid://0ecjd0wojyh7" path="res://Week 3 - Combat/sword_trail.gd" id="4_vgvf6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7kpeh"]
 radius = 0.4
@@ -15,18 +17,38 @@ material = SubResource("StandardMaterial3D_4s3wv")
 radius = 0.4
 height = 1.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_4s3wv"]
+[sub_resource type="BoxMesh" id="BoxMesh_vgvf6"]
 size = Vector3(0.5, 0.15, 0.2)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7kpeh"]
 albedo_color = Color(0.14901961, 0.14901961, 0.14901961, 1)
 
-[sub_resource type="BoxMesh" id="BoxMesh_polb7"]
+[sub_resource type="BoxMesh" id="BoxMesh_unmk6"]
 material = SubResource("StandardMaterial3D_7kpeh")
 size = Vector3(0.08, 0.08, 0.45)
 
+[sub_resource type="BoxMesh" id="BoxMesh_n3o8y"]
+size = Vector3(0.08, 0.02, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7kpeh"]
+size = Vector3(0.08, 0.02, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lr5gy"]
+albedo_color = Color(0.11764706, 0.11764706, 0.11764706, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_6y0wu"]
+material = SubResource("StandardMaterial3D_lr5gy")
+size = Vector3(0.4, 0.08, 0.08)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_giek5"]
+albedo_color = Color(0.1173548, 0.1173548, 0.1173548, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_l1we5"]
+material = SubResource("StandardMaterial3D_giek5")
+size = Vector3(0.08, 0.08, 0.2)
+
 [node name="Player" type="CharacterBody3D" unique_id=1319605708 groups=["player"]]
-collision_mask = 3
+collision_mask = 11
 script = ExtResource("1_4s3wv")
 bullet_scene = ExtResource("2_7kpeh")
 
@@ -40,17 +62,53 @@ mesh = SubResource("CapsuleMesh_polb7")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="MeshInstance3D" unique_id=894690755]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, -0.35)
-mesh = SubResource("BoxMesh_4s3wv")
+mesh = SubResource("BoxMesh_vgvf6")
 
 [node name="GunPivot" type="Node3D" parent="." unique_id=22335185]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1, 0)
+visible = false
 
-[node name="MeshInstance3D2" type="MeshInstance3D" parent="GunPivot" unique_id=1235239288]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="GunPivot" unique_id=1235239288]
 transform = Transform3D(1, 0, 0, 0, 1.0000001, 0, 0, 0, 1, 0, 0, -0.22)
-mesh = SubResource("BoxMesh_polb7")
+mesh = SubResource("BoxMesh_unmk6")
 
-[node name="GunTip" type="Marker3D" parent="GunPivot/MeshInstance3D2" unique_id=772230527]
+[node name="GunTip" type="Marker3D" parent="GunPivot/MeshInstance3D" unique_id=772230527]
 transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 1.0000004, 0, 0, -0.23)
+
+[node name="SwordPivot" type="Node3D" parent="." unique_id=97774764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.45, 1, 0)
+
+[node name="Blade" type="MeshInstance3D" parent="SwordPivot" unique_id=2138680792]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.78)
+mesh = SubResource("BoxMesh_n3o8y")
+
+[node name="SwordHitbox" type="Area3D" parent="SwordPivot/Blade" unique_id=1299189340]
+collision_layer = 4
+collision_mask = 8
+script = ExtResource("3_polb7")
+
+[node name="BladeShape" type="CollisionShape3D" parent="SwordPivot/Blade/SwordHitbox" unique_id=146107873]
+shape = SubResource("BoxShape3D_7kpeh")
+
+[node name="BladeTip" type="Marker3D" parent="SwordPivot/Blade" unique_id=171857710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+
+[node name="BladeBase" type="Marker3D" parent="SwordPivot/Blade" unique_id=1857680941]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+
+[node name="Guard" type="MeshInstance3D" parent="SwordPivot" unique_id=1276509173]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.24)
+mesh = SubResource("BoxMesh_6y0wu")
+
+[node name="Handle" type="MeshInstance3D" parent="SwordPivot" unique_id=1190947607]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.1)
+mesh = SubResource("BoxMesh_l1we5")
+
+[node name="SwordTrail" type="MeshInstance3D" parent="SwordPivot" unique_id=1222179042 node_paths=PackedStringArray("tip_marker", "base_marker")]
+script = ExtResource("4_vgvf6")
+tip_marker = NodePath("../Blade/BladeTip")
+base_marker = NodePath("../Blade/BladeBase")
+trail_color = Color(1, 1, 1, 0.9019608)
 
 [node name="CameraPivot" type="Node3D" parent="." unique_id=456885226]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)

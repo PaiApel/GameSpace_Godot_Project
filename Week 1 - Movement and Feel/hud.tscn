@@ -36,6 +36,9 @@ custom_minimum_size = Vector2(160, 12)
 layout_mode = 2
 show_percentage = false
 
+[node name="WeaponLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=18541589]
+layout_mode = 2
+
 [node name="Crosshair" type="Control" parent="." unique_id=1483842880]
 layout_mode = 3
 anchors_preset = 8
