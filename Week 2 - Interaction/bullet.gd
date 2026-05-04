@@ -22,7 +22,6 @@ func initialize(direction: Vector3, speed: float, player: Node) -> void:
 # ---------------------------------------------------------------------------
 func _ready() -> void:
 	body_entered.connect(_on_body_entered)
-	area_entered.connect(_on_area_entered)
 
 
 # ---------------------------------------------------------------------------
@@ -43,18 +42,5 @@ func _on_body_entered(body: Node) -> void:
 	
 	if body.has_method("take_hit"):
 		body.take_hit()
-	
-	queue_free()
-
-
-func _on_area_entered(area: Node) -> void:
-	if area == _player:
-		return
-	
-	if _player and _player.has_method("on_bullet_hit"):
-		_player.on_bullet_hit()
-	
-	if area.has_method("take_hit"):
-		area.take_hit()
 	
 	queue_free()

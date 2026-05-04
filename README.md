@@ -37,3 +37,6 @@ Bullets are physical objects that travel through the world. In slow-mo, you can 
 
 **Destructible Objects**  
 Objects change color as they take damage: white when healthy, orange when damaged, red when critical.
+
+**Drone Enemy**  
+A flying enemy that patrols the area and scans the ground with a rotating detection cone. If the player enters the cone, the drone locks on and dives at full speed. Takes multiple hits to destroy. The cone color indicates its state: green when patrolling, shifting to red as the lock-on completes.
