@@ -138,6 +138,14 @@ func _deactivate() -> void:
 	if _trail and _trail.has_method("stop_trail"):
 		_trail.stop_trail()
 	
+	# Reset sword pivot kembali seperti semula
+	if _swing_tween:
+		_swing_tween.kill()
+	_swing_tween = create_tween()
+	_swing_tween.tween_interval(0.5)
+	_swing_tween.tween_property(_sword_pivot, "rotation", Vector3.ZERO, 0.35) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_CUBIC)
+	
 	var was_last_hit := (_combo_index == 2)
 	_combo_index = (_combo_index + 1) % 3
 	

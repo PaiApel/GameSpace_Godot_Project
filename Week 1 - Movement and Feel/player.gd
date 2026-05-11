@@ -103,13 +103,12 @@ var _slowmo_cooldown_timer: float = 0.0
 
 # Node refs
 @onready var _camera_pivot: Node3D = $CameraPivot
-@onready var _spring_arm: SpringArm3D = $CameraPivot/SpringArm3D
-@onready var _gun_pivot: Node3D = $GunPivot
+@onready var _gun_pivot: Node3D = $CameraPivot/GunPivot
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
-@onready var _gun_tip: Marker3D = $GunPivot/MeshInstance3D/GunTip
-@onready var _sword_pivot: Node3D = $SwordPivot
-@onready var _sword_slash: SwordSlash = $SwordPivot/Blade/SwordHitbox
-@onready var _sword_trail: MeshInstance3D = $SwordPivot/SwordTrail
+@onready var _gun_tip: Marker3D = $CameraPivot/GunPivot/MeshInstance3D/GunTip
+@onready var _sword_pivot: Node3D = $CameraPivot/SwordPivot
+@onready var _sword_slash: SwordSlash = $CameraPivot/SwordPivot/Blade/SwordHitbox
+@onready var _sword_trail: MeshInstance3D = $CameraPivot/SwordPivot/SwordTrail
 
 # ---------------------------------------------------------------------------
 func _ready() -> void:
@@ -133,7 +132,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		rotate_y(-event.relative.x * mouse_sensitivity)
 		# Rotate camera ke atas/bawah
 		_camera_pivot.rotate_x(-event.relative.y * mouse_sensitivity)
-		_camera_pivot.rotation.x = clamp(_camera_pivot.rotation.x, deg_to_rad(-70), deg_to_rad(30))
+		_camera_pivot.rotation.x = clamp(_camera_pivot.rotation.x, deg_to_rad(-85), deg_to_rad(85))
 	
 	if event.is_action_pressed("ui_cancel"):
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
@@ -269,10 +268,7 @@ func _handle_movement(delta: float) -> void:
 
 
 func _sync_aim() -> void:
-	if _gun_pivot:
-		_gun_pivot.rotation.x = _camera_pivot.rotation.x
-	if _sword_pivot and not _is_slashing:
-		_sword_pivot.rotation.x = _camera_pivot.rotation.x
+	pass
 
 
 # ---------------------------------------------------------------------------
@@ -456,6 +452,7 @@ func _try_slash() -> void:
  
 func _on_slash_finished() -> void:
 	_is_slashing = false
+	_sword_pivot.rotation.x = 0.0
 	emit_signal("slash_finished")
 
 

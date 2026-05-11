@@ -182,7 +182,7 @@ func _update_camera_scan(delta: float) -> void:
 		return
 	
 	var t = clamp(deg_to_rad(cam_rotate_speed) * delta, 0.0, 1.0)
-	_camera_pivot.transform.basis = _camera_pivot.transform.basis.slerp(_cam_target_basis, t)
+	_camera_pivot.transform.basis = _camera_pivot.transform.basis.slerp(_cam_target_basis, t).orthonormalized()
 	
 	if _camera_pivot.transform.basis.z.dot(_cam_target_basis.z) > 0.9998:
 		_cam_is_waiting = true
@@ -263,7 +263,7 @@ func _update_locking(delta: float) -> void:
 		if abs(to_target.dot(Vector3.UP)) < 0.99:
 			var target_basis := Basis.looking_at(to_target, Vector3.UP)
 			var t = clamp(deg_to_rad(cam_rotate_speed * 3.0) * delta, 0.0, 1.0)
-			_camera_pivot.global_transform.basis = _camera_pivot.global_transform.basis.slerp(target_basis, t)
+			_camera_pivot.global_transform.basis = _camera_pivot.global_transform.basis.slerp(target_basis, t).orthonormalized()
 	
 	_lock_timer -= delta
 	if _lock_timer <= 0.0:

@@ -37,8 +37,8 @@ func _on_body_entered(body: Node) -> void:
 	if body == _player:
 		return
 	
-	if _player and _player.has_method("_on_bullet_hit"):
-		_player._on_bullet_hit()
+	if _player and _player.has_method("_on_hit"):
+		_player._on_hit()
 	
 	if body.has_method("take_hit"):
 		body.take_hit()

@@ -1,172 +1,305 @@
 [gd_scene format=3 uid="uid://cys88yr1p5h8j"]
 
-[ext_resource type="Script" uid="uid://m26aufrseq6e" path="res://Week 1 - Movement and Feel/hud.gd" id="1_uqsxo"]
+[ext_resource type="Script" uid="uid://m26aufrseq6e" path="res://Week 1 - Movement and Feel/hud.gd" id="1_ovfnc"]
+[ext_resource type="Shader" uid="uid://bpb8njffif7il" path="res://Week 5 - UI & Data Persistence/crosshair.gdshader" id="2_s733l"]
+[ext_resource type="FontFile" uid="uid://ewak68j7uwvi" path="res://Week 5 - UI & Data Persistence/Conthrax-SemiBold.otf" id="3_7mljm"]
 
-[node name="HUD" type="CanvasLayer" unique_id=324772508]
-script = ExtResource("1_uqsxo")
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_7mljm"]
+shader = ExtResource("2_s733l")
+shader_parameter/circle_radius = 0.25
+shader_parameter/circle_thickness = 0.01
+shader_parameter/circle_gap_size = 0.05
+shader_parameter/circle_color_main = Color(1, 1, 1, 1)
+shader_parameter/circle_color_outline = Color(0, 0, 0, 1)
+shader_parameter/circle_outline_width = 0.005
+shader_parameter/circle_outline_flat = true
+shader_parameter/circle_rotation_speed = 0.0
+shader_parameter/circle_base_angle = 0.0
+shader_parameter/dot_radius = 0.015
+shader_parameter/dot_color = Color(1, 1, 1, 1)
+shader_parameter/dot_outline_width = 0.05
+shader_parameter/dot_outline_color = Color(0, 0, 0, 1)
+shader_parameter/dot_outline_flat = true
+shader_parameter/cross_bar_width = 0.15
+shader_parameter/cross_thickness = 0.02
+shader_parameter/cross_gap_size = 0.05
+shader_parameter/cross_color_main = Color(1, 1, 1, 1)
+shader_parameter/cross_color_outline = Color(0, 0, 0, 1)
+shader_parameter/cross_outline_width = 0.005
+shader_parameter/cross_outline_flat = true
+shader_parameter/cross_rotation_speed = 0.0
+shader_parameter/cross_base_angle = 0.0
 
-[node name="MarginContainer" type="MarginContainer" parent="." unique_id=402119719]
-offset_right = 40.0
-offset_bottom = 40.0
-theme_override_constants/margin_left = 20
-theme_override_constants/margin_top = 20
-theme_override_constants/margin_right = 20
-theme_override_constants/margin_bottom = 20
+[sub_resource type="PlaceholderTexture2D" id="PlaceholderTexture2D_ucbw6"]
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=720686137]
-layout_mode = 2
-theme_override_constants/separation = 6
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_s733l"]
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
 
-[node name="AmmoLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=689480307]
-layout_mode = 2
+[sub_resource type="LabelSettings" id="LabelSettings_osnd6"]
+font = ExtResource("3_7mljm")
 
-[node name="TripleLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=130759587]
-layout_mode = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_7mljm"]
+bg_color = Color(1, 1, 1, 1)
+draw_center = false
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
 
-[node name="TripleCooldownBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1083979638]
-custom_minimum_size = Vector2(160, 12)
-layout_mode = 2
-show_percentage = false
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_osnd6"]
+bg_color = Color(0.1, 0.1, 0.1, 0.6)
 
-[node name="SlowMoLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=499251134]
-layout_mode = 2
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1flia"]
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0.6039216)
+border_width_left = 20
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+expand_margin_top = 2.0
+expand_margin_right = 1.0
+expand_margin_bottom = 2.0
 
-[node name="SlowMoCooldownBar" type="ProgressBar" parent="MarginContainer/VBoxContainer" unique_id=1095930728]
-custom_minimum_size = Vector2(160, 12)
-layout_mode = 2
-show_percentage = false
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ovfnc"]
+bg_color = Color(0.78431374, 0.78431374, 0, 1)
+border_width_left = 20
+expand_margin_top = 1.0
+expand_margin_bottom = 1.0
 
-[node name="WeaponLabel" type="Label" parent="MarginContainer/VBoxContainer" unique_id=18541589]
-layout_mode = 2
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_s733l"]
 
-[node name="Crosshair" type="Control" parent="." unique_id=1483842880]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jlcwl"]
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0.78431374)
+
+[sub_resource type="Gradient" id="Gradient_74res"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ucbw6"]
+gradient = SubResource("Gradient_74res")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_74res"]
+bg_color = Color(0.101960786, 0.101960786, 0.101960786, 0.6039216)
+border_width_left = 50
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+corner_detail = 1
+expand_margin_top = 3.0
+expand_margin_right = 1.0
+expand_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ucbw6"]
+bg_color = Color(0, 0, 0.78431374, 1)
+border_width_left = 50
+expand_margin_top = 2.0
+expand_margin_bottom = 2.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_1flia"]
+font = ExtResource("3_7mljm")
+font_size = 8
+font_color = Color(0, 0, 0, 1)
+
+[node name="HUD" type="CanvasLayer" unique_id=324772508 node_paths=PackedStringArray("_crosshair")]
+script = ExtResource("1_ovfnc")
+_crosshair = NodePath("Crosshair")
+
+[node name="Crosshair" type="TextureRect" parent="." unique_id=1825855613]
+material = SubResource("ShaderMaterial_7mljm")
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -54.0
+offset_top = -54.0
+offset_right = 54.0
+offset_bottom = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("PlaceholderTexture2D_ucbw6")
+
+[node name="HUD" type="Control" parent="." unique_id=1139879133]
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -10.0
-offset_top = -10.0
-offset_right = -10.0
-offset_bottom = -10.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Top" type="ColorRect" parent="Crosshair" unique_id=1357941684]
+[node name="MarginContainer" type="MarginContainer" parent="HUD" unique_id=618663674]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -1.0
-offset_top = -13.0
-offset_right = 1.0
-offset_bottom = -3.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -242.0
+offset_top = -106.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
 
-[node name="Bottom" type="ColorRect" parent="Crosshair" unique_id=1666431268]
+[node name="VBoxContainer" type="VBoxContainer" parent="HUD/MarginContainer" unique_id=510905942]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="WeaponRow" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer" unique_id=1289277112]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+theme_override_constants/separation = 10
+alignment = 2
+
+[node name="Sword" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow" unique_id=2107315121]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(108, 90)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="SwordSlot" type="PanelContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword" unique_id=1196412209]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Background" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword/SwordSlot" unique_id=1989386066]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_s733l")
+
+[node name="Label" type="Label" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword/SwordSlot" unique_id=13762170]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "This is a Sword"
+label_settings = SubResource("LabelSettings_osnd6")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="SwordBorder" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword/SwordSlot" unique_id=1578235184]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7mljm")
+
+[node name="SwordOverlay" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword/SwordSlot" unique_id=1723299475]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_osnd6")
+
+[node name="SwordSkillBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Sword" unique_id=1213077528]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_1flia")
+theme_override_styles/fill = SubResource("StyleBoxFlat_ovfnc")
+value = 100.0
+show_percentage = false
+
+[node name="Gun" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow" unique_id=1786361863]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(108, 90)
+layout_mode = 2
+size_flags_vertical = 8
+
+[node name="GunSlot" type="PanelContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun" unique_id=333191574]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Background" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=1657222393]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_s733l")
+
+[node name="Label" type="Label" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=661775647]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "This is a Gun"
+label_settings = SubResource("LabelSettings_osnd6")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="ReloadBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=1593761616]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_styles/background = SubResource("StyleBoxEmpty_s733l")
+theme_override_styles/fill = SubResource("StyleBoxFlat_jlcwl")
+value = 100.0
+fill_mode = 2
+show_percentage = false
+
+[node name="MarginContainer" type="MarginContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=984218405]
+layout_mode = 2
+theme_override_constants/margin_left = 7
+theme_override_constants/margin_top = 7
+theme_override_constants/margin_right = 7
+theme_override_constants/margin_bottom = 7
+
+[node name="Pips" type="HBoxContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot/MarginContainer" unique_id=1409553897]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 8
+
+[node name="TextureRect" type="TextureRect" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot/MarginContainer/Pips" unique_id=923505308]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+texture = SubResource("GradientTexture2D_ucbw6")
+expand_mode = 5
+
+[node name="TextureRect2" type="TextureRect" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot/MarginContainer/Pips" unique_id=189250844]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+texture = SubResource("GradientTexture2D_ucbw6")
+expand_mode = 5
+
+[node name="TextureRect3" type="TextureRect" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot/MarginContainer/Pips" unique_id=6885279]
+custom_minimum_size = Vector2(8, 0)
+layout_mode = 2
+texture = SubResource("GradientTexture2D_ucbw6")
+expand_mode = 5
+
+[node name="GunBorder" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=108318476]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_7mljm")
+
+[node name="GunOverlay" type="Panel" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun/GunSlot" unique_id=711637465]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_osnd6")
+
+[node name="GunSkillBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer/WeaponRow/Gun" unique_id=793211513]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_1flia")
+theme_override_styles/fill = SubResource("StyleBoxFlat_ovfnc")
+value = 100.0
+show_percentage = false
+
+[node name="SlowmoBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer" unique_id=583877474]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 8
+theme_override_styles/background = SubResource("StyleBoxFlat_74res")
+theme_override_styles/fill = SubResource("StyleBoxFlat_ucbw6")
+value = 100.0
+show_percentage = false
+
+[node name="Label" type="Label" parent="HUD/MarginContainer/VBoxContainer/SlowmoBar" unique_id=928726745]
+custom_minimum_size = Vector2(50, 0)
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
+anchors_preset = 4
 anchor_top = 0.5
-anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -1.0
-offset_top = 4.0
-offset_right = 1.0
-offset_bottom = 14.0
-grow_horizontal = 2
+offset_top = -6.5
+offset_right = 44.0
+offset_bottom = 6.5
 grow_vertical = 2
-mouse_filter = 2
-
-[node name="Left" type="ColorRect" parent="Crosshair" unique_id=477454398]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -14.0
-offset_top = -1.0
-offset_right = -4.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Right" type="ColorRect" parent="Crosshair" unique_id=1372292461]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 4.0
-offset_top = -1.0
-offset_right = 14.0
-offset_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="ReloadRing" type="Control" parent="Crosshair" unique_id=1656464778]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-mouse_filter = 2
-
-[node name="HitMarker" type="Control" parent="Crosshair" unique_id=408697722]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -20.0
-offset_right = 20.0
-offset_bottom = 20.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Diag1" type="ColorRect" parent="Crosshair/HitMarker" unique_id=1542222880]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -1.0
-offset_top = -7.0
-offset_right = 1.0
-offset_bottom = 7.0
-grow_horizontal = 2
-grow_vertical = 2
-rotation = 1.0471976
-pivot_offset_ratio = Vector2(0.5, 0.5)
-mouse_filter = 2
-color = Color(0.7764706, 0, 0, 1)
-
-[node name="Diag2" type="ColorRect" parent="Crosshair/HitMarker" unique_id=1420927732]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -1.0
-offset_top = -7.0
-offset_right = 1.0
-offset_bottom = 7.0
-grow_horizontal = 2
-grow_vertical = 2
-rotation = -1.0471976
-pivot_offset_ratio = Vector2(0.5, 0.5)
-mouse_filter = 2
-color = Color(0.7764706, 0, 0, 1)
+size_flags_horizontal = 0
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_font_sizes/font_size = 8
+text = "Slow-mo"
+label_settings = SubResource("LabelSettings_1flia")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
