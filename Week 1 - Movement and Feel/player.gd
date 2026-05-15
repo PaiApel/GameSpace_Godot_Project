@@ -183,6 +183,14 @@ func _physics_process(delta: float) -> void:
 		_shots_fired_in_air = 0
 	
 	move_and_slide()
+	
+	# Push RigidBody objects on collision
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var collider := collision.get_collider()
+		if collider is RigidBody3D:
+			var push_dir := -collision.get_normal()
+			collider.apply_central_impulse(push_dir * 5.0)
 
 
 # ---------------------------------------------------------------------------

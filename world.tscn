@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cys7nx0takeld" path="res://Week 1 - Movement and Feel/player.tscn" id="2_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://cys88yr1p5h8j" path="res://Week 1 - Movement and Feel/hud.tscn" id="3_036b0"]
 [ext_resource type="PackedScene" uid="uid://c1r8w0al2ywoy" path="res://Week 4 - Enemy AI & Navigation/drone.tscn" id="4_aqk2v"]
+[ext_resource type="PackedScene" uid="uid://yikhi7sveier" path="res://Week 6 - Physics-Based Mechanics & Puzzles/swing_door.tscn" id="5_036b0"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eluxt"]
 
@@ -123,3 +124,6 @@ recoil_force = 20.0
 triple_load_time = 0.5
 
 [node name="HUD" parent="." unique_id=324772508 instance=ExtResource("3_036b0")]
+
+[node name="SwingDoor" parent="." unique_id=417958758 instance=ExtResource("5_036b0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.184784, 0, 21.017149)

@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://yikhi7sveier"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_np28k"]
+size = Vector3(0.1, 2, 0.1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_4xyja"]
+size = Vector3(0.1, 2, 0.1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_pfmph"]
+size = Vector3(0.1, 2, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_rqxvv"]
+size = Vector3(0.1, 2, 1)
+
+[node name="SwingDoor" type="Node3D" unique_id=417958758]
+
+[node name="DoorFrame" type="StaticBody3D" parent="." unique_id=1996921320]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0.05)
+collision_layer = 2
+collision_mask = 5
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DoorFrame" unique_id=1781575527]
+mesh = SubResource("BoxMesh_np28k")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorFrame" unique_id=1839618352]
+shape = SubResource("BoxShape3D_4xyja")
+
+[node name="Door" type="RigidBody3D" parent="." unique_id=588798723]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+collision_layer = 2
+collision_mask = 21
+can_sleep = false
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Door" unique_id=1980730435]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+mesh = SubResource("BoxMesh_pfmph")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Door" unique_id=1205081800]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.5)
+shape = SubResource("BoxShape3D_rqxvv")
+
+[node name="HingeJoint3D" type="HingeJoint3D" parent="." unique_id=142745700]
+transform = Transform3D(1, 0, 0, 0, -4.371139e-08, -1, 0, 1, -4.371139e-08, 0, 1, 0)
+node_a = NodePath("../DoorFrame")
+node_b = NodePath("../Door")
+angular_limit/enable = true
+angular_limit/upper = 1.6580628
+angular_limit/lower = -1.6580628
