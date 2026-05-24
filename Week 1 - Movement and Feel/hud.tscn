@@ -98,6 +98,21 @@ font = ExtResource("3_7mljm")
 font_size = 8
 font_color = Color(0, 0, 0, 1)
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_oiixt"]
+bg_color = Color(0, 0, 0, 0.78431374)
+border_width_left = 5
+border_width_top = 5
+border_width_right = 5
+border_width_bottom = 5
+border_color = Color(1, 1, 1, 1)
+expand_margin_left = 5.0
+expand_margin_top = 5.0
+expand_margin_right = 5.0
+expand_margin_bottom = 5.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pr634"]
+bg_color = Color(0.09803922, 0.78431374, 0.19607843, 1)
+
 [node name="HUD" type="CanvasLayer" unique_id=324772508 node_paths=PackedStringArray("_crosshair")]
 script = ExtResource("1_ovfnc")
 _crosshair = NodePath("Crosshair")
@@ -190,7 +205,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_1flia")
 theme_override_styles/fill = SubResource("StyleBoxFlat_ovfnc")
-value = 100.0
+value = 50.0
 show_percentage = false
 
 [node name="Gun" type="VBoxContainer" parent="HUD/MarginContainer/VBoxContainer/WeaponRow" unique_id=1786361863]
@@ -272,7 +287,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_styles/background = SubResource("StyleBoxFlat_1flia")
 theme_override_styles/fill = SubResource("StyleBoxFlat_ovfnc")
-value = 100.0
+value = 50.0
 show_percentage = false
 
 [node name="SlowmoBar" type="ProgressBar" parent="HUD/MarginContainer/VBoxContainer" unique_id=583877474]
@@ -281,7 +296,7 @@ layout_mode = 2
 size_flags_vertical = 8
 theme_override_styles/background = SubResource("StyleBoxFlat_74res")
 theme_override_styles/fill = SubResource("StyleBoxFlat_ucbw6")
-value = 100.0
+value = 50.0
 show_percentage = false
 
 [node name="Label" type="Label" parent="HUD/MarginContainer/VBoxContainer/SlowmoBar" unique_id=928726745]
@@ -303,3 +318,15 @@ label_settings = SubResource("LabelSettings_1flia")
 horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 2
+
+[node name="HealthBar" type="ProgressBar" parent="HUD" unique_id=202034782]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 25.0
+offset_top = 25.0
+offset_right = 275.0
+offset_bottom = 45.0
+theme_override_styles/background = SubResource("StyleBoxFlat_oiixt")
+theme_override_styles/fill = SubResource("StyleBoxFlat_pr634")
+value = 50.0
+show_percentage = false

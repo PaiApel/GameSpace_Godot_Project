@@ -14,6 +14,7 @@ signal weapon_changed(weapon: int)
 signal slash_started()
 signal slash_finished()
 signal dash_changed(active: bool, cooldown_ratio: float)
+signal health_changed(current: float, max: float)
 
 # ---------------------------------------------------------------------------
 # Weapon enum
@@ -68,9 +69,14 @@ enum Weapon { GUN, SWORD }
 @export_group("Camera")
 @export var mouse_sensitivity: float = 0.003
 
+# --- Health ---
+@export_group("Health")
+@export var max_health: float = 100.0
+
 # ---------------------------------------------------------------------------
 # Internal state
 # ---------------------------------------------------------------------------
+var _current_health: float
 var _jump_velocity: float
 var _current_weapon: Weapon = Weapon.GUN
 
@@ -112,6 +118,8 @@ var _slowmo_cooldown_timer: float = 0.0
 
 # ---------------------------------------------------------------------------
 func _ready() -> void:
+	_current_health = max_health
+	emit_signal("health_changed", _current_health, max_health)
 	_jump_velocity = sqrt(2.0 * gravity * jump_height)
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	
@@ -141,7 +149,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("swap_weapon"):
 		_swap_weapon()
 	
-	# Noraml attack
+	# Normal attack
 	if event.is_action_pressed("attack"):
 		match _current_weapon:
 			Weapon.GUN:
@@ -345,6 +353,11 @@ func _spawn_bullet() -> void:
 	
 	if bullet.has_method("initialize"):
 		bullet.initialize(shoot_dir, bullet_speed, self)
+
+
+func take_hit(amount: float) -> void:
+	_current_health = max(0.0, _current_health - amount)
+	emit_signal("health_changed", _current_health, max_health)
 
 
 func _on_hit() -> void:

@@ -22,6 +22,10 @@ var _state: State = State.PATROL
 @export_group("Health")
 @export var max_hits: int = 3
 
+@export_group("Explosion")
+@export var blast_radius: float = 8.0
+@export var explosion_damage: float = 25.0
+
 @export_group("Patrol")
 @export var patrol_speed: float = 4.0
 @export var wander_radius: float = 20.0
@@ -309,6 +313,11 @@ func _die() -> void:
 	_state = State.DEAD
 	velocity = Vector3.ZERO
 	emit_signal("drone_died")
+	
+	# Explosion damage
+	if _player and _player.has_method("take_hit"):
+		if global_position.distance_to(_player.global_position) <= blast_radius:
+			_player.take_hit(explosion_damage)
 	
 	# Detach particles before queue_free so the effect finishes playing.
 	var particles: Node = get_node_or_null("GPUParticles3D")

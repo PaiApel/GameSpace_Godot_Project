@@ -29,6 +29,11 @@ extends CanvasLayer
 @onready var _slowmo_bar: ProgressBar = %SlowmoBar
 
 # ---------------------------------------------------------------------------
+# Node refs Health Bar
+# ---------------------------------------------------------------------------
+@onready var _health_bar: ProgressBar = %HealthBar
+
+# ---------------------------------------------------------------------------
 # Crosshair shader constants
 # ---------------------------------------------------------------------------
 const GUN_CIRCLE_RADIUS: float = 0.25
@@ -88,6 +93,7 @@ func _ready() -> void:
 		player.slash_started.connect(_on_slash_started)
 		player.slash_finished.connect(_on_slash_finished)
 		player.dash_changed.connect(_on_dash_changed)
+		player.health_changed.connect(_on_health_changed)
 	else:
 		push_warning("HUD: No node found in group 'player'")
 	
@@ -96,6 +102,7 @@ func _ready() -> void:
 	_set_sword_active(false)
 	_apply_gun_crosshair()
 	
+	_health_bar.value = 100.0
 	_gun_skill_bar.value = 100.0
 	_sword_skill_bar.value = 100.0
 	_slowmo_bar.value = 100.0
@@ -335,3 +342,11 @@ func _on_hit_registered() -> void:
 		mat.set_shader_parameter("cross_color_main", COLOR_WHITE)
 		mat.set_shader_parameter("dot_color", COLOR_WHITE)
 	)
+
+
+# ---------------------------------------------------------------------------
+# Health
+# ---------------------------------------------------------------------------
+func _on_health_changed(current: float, max_hp: float) -> void:
+	_health_bar.max_value = max_hp
+	_health_bar.value = current
