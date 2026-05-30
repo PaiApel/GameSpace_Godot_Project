@@ -202,6 +202,19 @@ func _physics_process(delta: float) -> void:
 
 
 # ---------------------------------------------------------------------------
+# Public Method
+# ---------------------------------------------------------------------------
+func take_hit(amount: float) -> void:
+	_current_health = max(0.0, _current_health - amount)
+	emit_signal("health_changed", _current_health, max_health)
+
+
+func heal(amount: float) -> void:
+	_current_health = min(_current_health + amount, max_health)
+	emit_signal("health_changed", _current_health, max_health)
+
+
+# ---------------------------------------------------------------------------
 # Weapon swap
 # ---------------------------------------------------------------------------
 func _swap_weapon() -> void:
@@ -353,11 +366,6 @@ func _spawn_bullet() -> void:
 	
 	if bullet.has_method("initialize"):
 		bullet.initialize(shoot_dir, bullet_speed, self)
-
-
-func take_hit(amount: float) -> void:
-	_current_health = max(0.0, _current_health - amount)
-	emit_signal("health_changed", _current_health, max_health)
 
 
 func _on_hit() -> void:

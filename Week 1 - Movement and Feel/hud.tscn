@@ -1,8 +1,14 @@
 [gd_scene format=3 uid="uid://cys88yr1p5h8j"]
 
 [ext_resource type="Script" uid="uid://m26aufrseq6e" path="res://Week 1 - Movement and Feel/hud.gd" id="1_ovfnc"]
+[ext_resource type="Shader" uid="uid://mjwm2jrd4ofr" path="res://Week 7 - Environmental Mechanics/poison_blur.gdshader" id="2_osnd6"]
 [ext_resource type="Shader" uid="uid://bpb8njffif7il" path="res://Week 5 - UI & Data Persistence/crosshair.gdshader" id="2_s733l"]
 [ext_resource type="FontFile" uid="uid://ewak68j7uwvi" path="res://Week 5 - UI & Data Persistence/Conthrax-SemiBold.otf" id="3_7mljm"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_1flia"]
+shader = ExtResource("2_osnd6")
+shader_parameter/blur_strength = 0.10000000475
+shader_parameter/tint_strength = 0.10000000475
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_7mljm"]
 shader = ExtResource("2_s733l")
@@ -116,6 +122,24 @@ bg_color = Color(0.09803922, 0.78431374, 0.19607843, 1)
 [node name="HUD" type="CanvasLayer" unique_id=324772508 node_paths=PackedStringArray("_crosshair")]
 script = ExtResource("1_ovfnc")
 _crosshair = NodePath("Crosshair")
+
+[node name="BlurRect" type="ColorRect" parent="." unique_id=1102179639]
+material = SubResource("ShaderMaterial_1flia")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TintRect" type="ColorRect" parent="." unique_id=1401398896]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
 
 [node name="Crosshair" type="TextureRect" parent="." unique_id=1825855613]
 material = SubResource("ShaderMaterial_7mljm")

@@ -5,6 +5,9 @@
 [ext_resource type="PackedScene" uid="uid://cys88yr1p5h8j" path="res://Week 1 - Movement and Feel/hud.tscn" id="3_036b0"]
 [ext_resource type="PackedScene" uid="uid://c1r8w0al2ywoy" path="res://Week 4 - Enemy AI & Navigation/drone.tscn" id="4_aqk2v"]
 [ext_resource type="PackedScene" uid="uid://yikhi7sveier" path="res://Week 6 - Physics-Based Mechanics & Puzzles/swing_door.tscn" id="5_036b0"]
+[ext_resource type="PackedScene" uid="uid://bekxdcmb7dunk" path="res://Week 7 - Environmental Mechanics/electric_floor.tscn" id="6_dwbse"]
+[ext_resource type="PackedScene" uid="uid://b57dx082chv38" path="res://Week 7 - Environmental Mechanics/healing_fountain.tscn" id="7_pkg7o"]
+[ext_resource type="PackedScene" uid="uid://dcw8n0jkbeo87" path="res://Week 7 - Environmental Mechanics/poison_fog.tscn" id="8_gbfbk"]
 
 [sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_eluxt"]
 
@@ -127,3 +130,17 @@ triple_load_time = 0.5
 
 [node name="SwingDoor" parent="." unique_id=417958758 instance=ExtResource("5_036b0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20.184784, 0, 21.017149)
+
+[node name="ElectricFloor" parent="." unique_id=870382440 instance=ExtResource("6_dwbse")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0.15, -1)
+
+[node name="HealingFountain" parent="." unique_id=1254559608 instance=ExtResource("7_pkg7o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 19, 0, -12)
+
+[node name="PoisonFog" parent="." unique_id=901041024 node_paths=PackedStringArray("blur_rect", "tint_rect") instance=ExtResource("8_gbfbk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 0, 8)
+tint_color = Color(0.09985284, 0.66668326, 0, 0.2)
+blur_rect = NodePath("../HUD/BlurRect")
+tint_rect = NodePath("../HUD/TintRect")
+
+[editable path="HUD"]

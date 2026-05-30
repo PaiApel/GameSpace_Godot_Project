@@ -78,6 +78,7 @@ swap_weapon={
 3d_physics/layer_3="Bullet"
 3d_physics/layer_4="Destructible"
 3d_physics/layer_5="Drone"
+3d_physics/layer_6="Electric Floor"
 
 [physics]
 

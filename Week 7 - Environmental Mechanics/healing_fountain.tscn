@@ -1,0 +1,84 @@
+[gd_scene format=3 uid="uid://b57dx082chv38"]
+
+[ext_resource type="Script" uid="uid://bewbsij5hed6j" path="res://Week 7 - Environmental Mechanics/healing_fountain.gd" id="1_e821p"]
+[ext_resource type="Texture2D" uid="uid://dre7s2evws42c" path="res://Week 7 - Environmental Mechanics/Polygon 44.png" id="1_oelyl"]
+[ext_resource type="Shader" uid="uid://bkc7l07f8oidf" path="res://Week 7 - Environmental Mechanics/barrier_fade.gdshader" id="2_qssvo"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_e821p"]
+radius = 4.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qssvo"]
+albedo_color = Color(0, 0.735357, 0, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_n281o"]
+material = SubResource("StandardMaterial3D_qssvo")
+top_radius = 4.0
+bottom_radius = 4.0
+height = 0.05
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n281o"]
+render_priority = 0
+shader = ExtResource("2_qssvo")
+shader_parameter/emission_color = Color(1, 0.9, 0.2, 1)
+shader_parameter/emission_energy = 1.0
+shader_parameter/base_alpha = 1.0
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_yearl"]
+material = SubResource("ShaderMaterial_n281o")
+top_radius = 4.0
+bottom_radius = 4.0
+cap_top = false
+cap_bottom = false
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_k05q2"]
+emission_shape = 6
+emission_ring_axis = Vector3(0, 1, 0)
+emission_ring_height = 1.0
+emission_ring_radius = 3.5
+emission_ring_inner_radius = 0.0
+emission_ring_cone_angle = 90.0
+direction = Vector3(0, 1, 0)
+spread = 20.0
+initial_velocity_min = 0.29999998
+initial_velocity_max = 0.79999995
+gravity = Vector3(0, 0, 0)
+scale_min = 0.099999994
+scale_max = 0.19999999
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sx727"]
+transparency = 1
+albedo_texture = ExtResource("1_oelyl")
+emission_enabled = true
+emission = Color(0, 1, 0, 1)
+billboard_mode = 3
+billboard_keep_scale = true
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_q3n5t"]
+material = SubResource("StandardMaterial3D_sx727")
+
+[node name="HealingFountain" type="Area3D" unique_id=1254559608]
+script = ExtResource("1_e821p")
+floor_emission_color = Color(0, 0.7977378, 0, 1)
+floor_emission_min = 0.5
+floor_emission_max = 2.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1415769254]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+shape = SubResource("CylinderShape3D_e821p")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1255928106]
+mesh = SubResource("CylinderMesh_n281o")
+
+[node name="Barrier" type="MeshInstance3D" parent="." unique_id=1831826255]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+mesh = SubResource("CylinderMesh_yearl")
+
+[node name="GPUParticles3D" type="GPUParticles3D" parent="." unique_id=495633307]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+amount = 25
+lifetime = 3.0
+process_material = SubResource("ParticleProcessMaterial_k05q2")
+draw_pass_1 = SubResource("QuadMesh_q3n5t")
