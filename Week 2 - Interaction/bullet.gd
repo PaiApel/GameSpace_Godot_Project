@@ -37,10 +37,21 @@ func _on_body_entered(body: Node) -> void:
 	if body == _player:
 		return
 	
-	if _player and _player.has_method("_on_hit"):
-		_player._on_hit()
-	
 	if body.has_method("take_hit"):
-		body.take_hit()
+		var hit_pos := global_position
+		var space := get_world_3d().direct_space_state
+		var query := PhysicsRayQueryParameters3D.create(
+			global_position - _direction * 0.2,
+			global_position + _direction * 0.2
+		)
+		query.exclude = [self, _player]
+		var result := space.intersect_ray(query)
+		if result:
+			hit_pos = result.position
+		body.take_hit(hit_pos, -_direction)
+		
+		if _player and _player.has_method("_on_hit"):
+			_player._on_hit()
+	
 	
 	queue_free()

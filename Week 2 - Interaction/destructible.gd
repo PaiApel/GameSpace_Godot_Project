@@ -22,6 +22,7 @@ var _current_state: State = State.HEALTHY
 
 # Node refs
 @onready var _mesh: MeshInstance3D = $Mesh
+@onready var _hit_debris: GPUParticles3D = $HitDebris
 
 
 # ---------------------------------------------------------------------------
@@ -32,9 +33,19 @@ func _ready() -> void:
 # ---------------------------------------------------------------------------
 # Dipanggil oleh Bullet saat collision
 # ---------------------------------------------------------------------------
-func take_hit() -> void:
+func take_hit(hit_position: Vector3, hit_normal: Vector3) -> void:
 	if _current_state == State.DESTROYED:
 		return
+	
+	# Spawn debris at the hit position
+	if _hit_debris:
+		if _hit_debris.get_parent() == self:
+			var parent := get_parent()
+			remove_child(_hit_debris)
+			parent.add_child(_hit_debris)
+		_hit_debris.global_position = hit_position
+		_hit_debris.process_material.direction = hit_normal
+		_hit_debris.restart()
 	
 	_hits_taken += 1
 	_update_state()
@@ -70,6 +81,8 @@ func _apply_state() -> void:
 			_set_tint(color_critical)
 		
 		State.DESTROYED:
+			if _hit_debris:
+				_hit_debris.finished.connect(_hit_debris.queue_free)
 			queue_free()
 
 

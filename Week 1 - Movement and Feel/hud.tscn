@@ -3,7 +3,13 @@
 [ext_resource type="Script" uid="uid://m26aufrseq6e" path="res://Week 1 - Movement and Feel/hud.gd" id="1_ovfnc"]
 [ext_resource type="Shader" uid="uid://mjwm2jrd4ofr" path="res://Week 7 - Environmental Mechanics/poison_blur.gdshader" id="2_osnd6"]
 [ext_resource type="Shader" uid="uid://bpb8njffif7il" path="res://Week 5 - UI & Data Persistence/crosshair.gdshader" id="2_s733l"]
+[ext_resource type="Shader" uid="uid://d4boqlphcwykk" path="res://Week 8 - Finishing Touch/heartbeat_vignette.gdshader" id="3_1flia"]
 [ext_resource type="FontFile" uid="uid://ewak68j7uwvi" path="res://Week 5 - UI & Data Persistence/Conthrax-SemiBold.otf" id="3_7mljm"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ovfnc"]
+shader = ExtResource("3_1flia")
+shader_parameter/pulse_strength = 0.0
+shader_parameter/vignette_color = Color(0.6, 0, 0, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1flia"]
 shader = ExtResource("2_osnd6")
@@ -122,6 +128,24 @@ bg_color = Color(0.09803922, 0.78431374, 0.19607843, 1)
 [node name="HUD" type="CanvasLayer" unique_id=324772508 node_paths=PackedStringArray("_crosshair")]
 script = ExtResource("1_ovfnc")
 _crosshair = NodePath("Crosshair")
+
+[node name="VignetteRect" type="ColorRect" parent="." unique_id=549435463]
+material = SubResource("ShaderMaterial_ovfnc")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DamageFlash" type="ColorRect" parent="." unique_id=1185777503]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="BlurRect" type="ColorRect" parent="." unique_id=1102179639]
 material = SubResource("ShaderMaterial_1flia")

@@ -172,7 +172,20 @@ func _on_body_entered(body: Node) -> void:
 	_hit_nodes.append(body)
 	
 	if body.has_method("take_hit"):
-		body.take_hit()
+		var hit_pos = body.global_position
+		var hit_normal = (body.global_position - _player.global_position).normalized()
+		var space = _player.get_world_3d().direct_space_state
+		var origin = _player.global_position
+		var query := PhysicsRayQueryParameters3D.create(
+			origin,
+			origin + hit_normal * 10.0
+		)
+		query.exclude = [_player]
+		var result = space.intersect_ray(query)
+		if result:
+			hit_pos = result.position
+			hit_normal = result.normal
+		body.take_hit(body.global_position, hit_normal)
 	
 	if _player and _player.has_method("_on_hit"):
 		_player._on_hit()

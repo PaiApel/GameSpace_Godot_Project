@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://5g6mo81ykk75" path="res://Week 1 - Movement and Feel/player.gd" id="1_4s3wv"]
 [ext_resource type="PackedScene" uid="uid://dttf5ppgbg6k8" path="res://Week 2 - Interaction/bullet.tscn" id="2_7kpeh"]
 [ext_resource type="Script" uid="uid://m2txcc6n7hyd" path="res://Week 3 - Combat/sword_slash.gd" id="3_polb7"]
+[ext_resource type="Shader" uid="uid://ddht0g5vimbjo" path="res://Week 8 - Finishing Touch/chromatic_aberration.gdshader" id="3_unmk6"]
 [ext_resource type="Script" uid="uid://0ecjd0wojyh7" path="res://Week 3 - Combat/sword_trail.gd" id="4_vgvf6"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_7kpeh"]
@@ -20,12 +21,62 @@ height = 1.8
 [sub_resource type="BoxMesh" id="BoxMesh_vgvf6"]
 size = Vector3(0.5, 0.15, 0.2)
 
+[sub_resource type="Curve" id="Curve_unmk6"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_n3o8y"]
+curve = SubResource("Curve_unmk6")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n3o8y"]
+render_priority = 127
+shader = ExtResource("3_unmk6")
+shader_parameter/distance_curve = SubResource("CurveTexture_n3o8y")
+shader_parameter/aberration_strength = 0.0
+
+[sub_resource type="QuadMesh" id="QuadMesh_lr5gy"]
+material = SubResource("ShaderMaterial_n3o8y")
+size = Vector2(2, 2)
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7kpeh"]
 albedo_color = Color(0.14901961, 0.14901961, 0.14901961, 1)
 
 [sub_resource type="BoxMesh" id="BoxMesh_unmk6"]
 material = SubResource("StandardMaterial3D_7kpeh")
 size = Vector3(0.08, 0.08, 0.45)
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_unmk6"]
+angle_min = -74.99999
+angle_max = 75.000015
+direction = Vector3(0, 0, -1)
+initial_velocity_min = 0.5
+initial_velocity_max = 2.0
+gravity = Vector3(0, 0, 0)
+
+[sub_resource type="Gradient" id="Gradient_n3o8y"]
+colors = PackedColorArray(0.89713544, 0.6445697, 0.1086375, 1, 0, 0, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_lr5gy"]
+gradient = SubResource("Gradient_n3o8y")
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_6y0wu"]
+transparency = 1
+blend_mode = 1
+albedo_texture = SubResource("GradientTexture2D_lr5gy")
+roughness = 0.0
+emission_enabled = true
+emission_energy_multiplier = 8.0
+emission_texture = SubResource("GradientTexture2D_lr5gy")
+billboard_mode = 3
+particles_anim_h_frames = 1
+particles_anim_v_frames = 1
+particles_anim_loop = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_giek5"]
+material = SubResource("StandardMaterial3D_6y0wu")
+size = Vector2(0.2, 0.2)
 
 [sub_resource type="BoxMesh" id="BoxMesh_n3o8y"]
 size = Vector3(0.08, 0.02, 1)
@@ -75,9 +126,14 @@ spring_length = 0.0
 
 [node name="Camera3D" type="Camera3D" parent="CameraPivot/SpringArm3D" unique_id=382744307]
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="CameraPivot/SpringArm3D/Camera3D" unique_id=429974710]
+transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 0.9999999, 0, 0, 0)
+layers = 2
+extra_cull_margin = 16384.0
+mesh = SubResource("QuadMesh_lr5gy")
+
 [node name="GunPivot" type="Node3D" parent="CameraPivot" unique_id=22335185]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.25, -0.5)
-visible = false
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="CameraPivot/GunPivot" unique_id=1235239288]
 transform = Transform3D(1, 0, 0, 0, 1.0000001, 0, 0, 0, 1, 0, 0, -0.22)
@@ -86,8 +142,22 @@ mesh = SubResource("BoxMesh_unmk6")
 [node name="GunTip" type="Marker3D" parent="CameraPivot/GunPivot/MeshInstance3D" unique_id=772230527]
 transform = Transform3D(1, 0, 0, 0, 0.9999999, 0, 0, 0, 1.0000004, 0, 0, -0.23)
 
+[node name="MuzzleLight" type="OmniLight3D" parent="CameraPivot/GunPivot/MeshInstance3D/GunTip" unique_id=1020609336]
+visible = false
+light_color = Color(1, 0.87058824, 0.45882353, 1)
+light_energy = 3.0
+
+[node name="MuzzleParticles" type="GPUParticles3D" parent="CameraPivot/GunPivot/MeshInstance3D/GunTip" unique_id=176883770]
+emitting = false
+lifetime = 0.05
+one_shot = true
+explosiveness = 0.9
+process_material = SubResource("ParticleProcessMaterial_unmk6")
+draw_pass_1 = SubResource("QuadMesh_giek5")
+
 [node name="SwordPivot" type="Node3D" parent="CameraPivot" unique_id=97774764]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, -0.25, -0.5)
+visible = false
 
 [node name="Blade" type="MeshInstance3D" parent="CameraPivot/SwordPivot" unique_id=2138680792]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -0.78)

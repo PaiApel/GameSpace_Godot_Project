@@ -33,10 +33,39 @@ Three-hit combo: diagonal slash, horizontal recovery, vertical finisher. Chain h
 Slows down time for a limited duration. Only physics and bullet travel are affected, cooldowns and reloads tick in real time regardless.
 
 **Visible Projectile**  
-Bullets are physical objects that travel through the world. In slow-mo, you can actually watch them fly (if you can even see them).
+Bullets are physical objects that travel through the world. In slow-mo, you can actually watch them fly.
 
 **Destructible Objects**  
 Objects change color as they take damage: white when healthy, orange when damaged, red when critical.
 
 **Drone Enemy**  
-A flying enemy that patrols the area and scans the ground with a rotating detection cone. If the player enters the cone, the drone locks on and dives at full speed. Takes multiple hits to destroy. The cone color indicates its state: green when patrolling, shifting to red as the lock-on completes.
+A flying enemy that patrols the area and scans the ground with a rotating detection cone. If the player enters the cone, the drone locks on and dives at full speed. Takes multiple hits to destroy. The cone color indicates its state: green when patrolling, shifting to red as the lock-on completes. Explode and dealing damage in radius on death.
+
+---
+
+## Visual Feedback
+
+**Chromatic Aberration (Dash)**  
+A color fringe distortion effect at the screen edges triggers on every dash.
+
+**Hit Stop**  
+The game freezes briefly on every successful hit, making attacks feel more impactful.
+
+**Muzzle Flash**  
+A burst of light and particles fires from the gun barrel on every shot.
+
+**Screen Flash**  
+The screen flashes white briefly when taking damage.
+
+**Heartbeat Effect**  
+A red vignette pulses at the screen edges when HP drops below 30%. The pulse speeds up as HP gets lower.
+
+**Particle Effects**  
+Sparks burst from the drone and debris puffs from destructibles when hit.
+
+**Screen Shake**  
+The camera shakes on drone explosions, electric floor zaps, and hard landings.
+
+---
+
+> **Known issue:** Due to a Compatibility renderer limitation in Godot 4, transparent objects (poison fog, drone cone, healing fountain barrier) may appear invisible while the chromatic aberration shader is active.

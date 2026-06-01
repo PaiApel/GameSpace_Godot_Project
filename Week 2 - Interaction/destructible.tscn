@@ -8,6 +8,38 @@ size = Vector3(1.2, 1.2, 1.2)
 [sub_resource type="BoxMesh" id="BoxMesh_qpki1"]
 size = Vector3(1.2, 1.2, 1.2)
 
+[sub_resource type="Curve" id="Curve_ynvsl"]
+_limits = [-360.0, 360.0, 0.0, 1.0]
+_data = [Vector2(0, -360), 0.0, 0.0, 0, 0, Vector2(1, 360), 1008.0, 0.0, 0, 0]
+point_count = 2
+
+[sub_resource type="CurveTexture" id="CurveTexture_1ixel"]
+curve = SubResource("Curve_ynvsl")
+
+[sub_resource type="Gradient" id="Gradient_h1nkw"]
+offsets = PackedFloat32Array(0, 0.99450547)
+colors = PackedColorArray(0.6106829, 0.610683, 0.610683, 1, 0.38044125, 0.38044122, 0.38044113, 1)
+
+[sub_resource type="GradientTexture1D" id="GradientTexture1D_68b36"]
+gradient = SubResource("Gradient_h1nkw")
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_qpki1"]
+direction = Vector3(0, 0, 0)
+initial_velocity_min = 3.0
+initial_velocity_max = 8.0
+angular_velocity_curve = SubResource("CurveTexture_1ixel")
+scale_min = 0.099999994
+scale_max = 0.19999999
+color_ramp = SubResource("GradientTexture1D_68b36")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1ixel"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="SphereMesh" id="SphereMesh_esqq8"]
+material = SubResource("StandardMaterial3D_1ixel")
+radius = 0.25
+height = 0.5
+
 [node name="Crate" type="StaticBody3D" unique_id=154054190]
 collision_layer = 8
 collision_mask = 21
@@ -18,3 +50,12 @@ shape = SubResource("BoxShape3D_h1nkw")
 
 [node name="Mesh" type="MeshInstance3D" parent="." unique_id=1315268316]
 mesh = SubResource("BoxMesh_qpki1")
+
+[node name="HitDebris" type="GPUParticles3D" parent="." unique_id=1000376329]
+emitting = false
+amount = 20
+lifetime = 0.4
+one_shot = true
+explosiveness = 1.0
+process_material = SubResource("ParticleProcessMaterial_qpki1")
+draw_pass_1 = SubResource("SphereMesh_esqq8")

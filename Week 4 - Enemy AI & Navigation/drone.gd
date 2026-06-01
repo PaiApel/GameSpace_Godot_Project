@@ -52,6 +52,7 @@ var _state: State = State.PATROL
 @onready var _raycast_origin: Marker3D = $CameraPivot/RaycastOrigin
 @onready var _cone_visual: MeshInstance3D = $ConeVisual
 @onready var _health_bar: ProgressBar = $SubViewport/ProgressBar
+@onready var _hit_sparks: GPUParticles3D = $HitSparks
 
 # ---------------------------------------------------------------------------
 # Internal state
@@ -293,9 +294,15 @@ func _update_diving() -> void:
 # ---------------------------------------------------------------------------
 # Attackable
 # ---------------------------------------------------------------------------
-func take_hit() -> void:
+func take_hit(hit_position: Vector3, hit_normal: Vector3) -> void:
 	if _state == State.DEAD:
 		return
+	
+	# Spawn sparks at the hit position
+	if _hit_sparks:
+		_hit_sparks.global_position = hit_position
+		_hit_sparks.restart()
+	
 	_hits_taken += 1
 	_health_bar.value = max_hits - _hits_taken
 	if _hits_taken >= max_hits:
@@ -316,8 +323,12 @@ func _die() -> void:
 	
 	# Explosion damage
 	if _player and _player.has_method("take_hit"):
-		if global_position.distance_to(_player.global_position) <= blast_radius:
+		var dist := global_position.distance_to(_player.global_position)
+		if dist <= blast_radius:
 			_player.take_hit(explosion_damage)
+		if _player.has_method("add_trauma"):
+			var t = 1.0 - clamp(dist / blast_radius, 0.0, 1.0)
+			_player.add_trauma(t * 0.8)
 	
 	# Detach particles before queue_free so the effect finishes playing.
 	var particles: Node = get_node_or_null("GPUParticles3D")

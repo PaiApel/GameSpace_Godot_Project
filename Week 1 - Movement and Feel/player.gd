@@ -80,6 +80,8 @@ var _current_health: float
 var _jump_velocity: float
 var _current_weapon: Weapon = Weapon.GUN
 
+var _tween_chroma: Tween = null
+
 # Bullet state
 var _bullets: int = 1 
 var _is_reloading: bool = false
@@ -107,14 +109,21 @@ var _slowmo_active: bool = false
 var _slowmo_timer: float = 0.0
 var _slowmo_cooldown_timer: float = 0.0
 
+# Screen shake
+var _shake_trauma: float = 0.0
+var _prev_velocity_y: float = 0.0
+
 # Node refs
 @onready var _camera_pivot: Node3D = $CameraPivot
 @onready var _gun_pivot: Node3D = $CameraPivot/GunPivot
 @onready var _camera: Camera3D = $CameraPivot/SpringArm3D/Camera3D
 @onready var _gun_tip: Marker3D = $CameraPivot/GunPivot/MeshInstance3D/GunTip
+@onready var _muzzle_light: OmniLight3D = $CameraPivot/GunPivot/MeshInstance3D/GunTip/MuzzleLight
+@onready var _muzzle_particle: GPUParticles3D = $CameraPivot/GunPivot/MeshInstance3D/GunTip/MuzzleParticles
 @onready var _sword_pivot: Node3D = $CameraPivot/SwordPivot
 @onready var _sword_slash: SwordSlash = $CameraPivot/SwordPivot/Blade/SwordHitbox
 @onready var _sword_trail: MeshInstance3D = $CameraPivot/SwordPivot/SwordTrail
+@onready var _chroma_mesh: MeshInstance3D = $CameraPivot/SpringArm3D/Camera3D/MeshInstance3D
 
 # ---------------------------------------------------------------------------
 func _ready() -> void:
@@ -126,6 +135,10 @@ func _ready() -> void:
 	if _sword_slash:
 		_sword_slash.initialize(self, _sword_pivot, _sword_trail)
 		_sword_slash.monitoring = false
+	
+	
+	if _gun_pivot:
+		_gun_pivot.look_at(_camera.global_position + (-_camera.global_transform.basis.z * 100.0))
 	
 	if _gun_pivot:
 		_gun_pivot.visible = true
@@ -173,7 +186,7 @@ func _unhandled_input(event: InputEvent) -> void:
 # ---------------------------------------------------------------------------
 func _physics_process(delta: float) -> void:
 	# Pake real delta untuk slow-mo timers (tidak terpengaruh oleh Engine.time_scale)
-	var real_delta: float = delta / Engine.time_scale
+	var real_delta: float = delta / Engine.time_scale if Engine.time_scale > 0.0 else 0.0
 	
 	_update_slowmo(real_delta)
 	_update_reload(real_delta)
@@ -184,7 +197,6 @@ func _physics_process(delta: float) -> void:
 	_apply_gravity(delta)
 	_handle_jump()
 	_handle_movement(delta)
-	_sync_aim()
 	
 	# Reset air shot counter saat landing
 	if is_on_floor():
@@ -199,6 +211,13 @@ func _physics_process(delta: float) -> void:
 		if collider is RigidBody3D:
 			var push_dir := -collision.get_normal()
 			collider.apply_central_impulse(push_dir * 5.0)
+	
+	_update_shake(real_delta)
+	
+	# Hard landing detection
+	if is_on_floor() and _prev_velocity_y < -30.0:
+		add_trauma(0.4)
+	_prev_velocity_y = velocity.y
 
 
 # ---------------------------------------------------------------------------
@@ -212,6 +231,28 @@ func take_hit(amount: float) -> void:
 func heal(amount: float) -> void:
 	_current_health = min(_current_health + amount, max_health)
 	emit_signal("health_changed", _current_health, max_health)
+
+
+func add_trauma(amount: float) -> void:
+	_shake_trauma = min(_shake_trauma + amount, 1.0)
+
+
+# ---------------------------------------------------------------------------
+# Camera shake
+# ---------------------------------------------------------------------------
+func _update_shake(real_delta: float) -> void:
+	if _shake_trauma <= 0.0:
+		_camera.h_offset = 0.0
+		_camera.v_offset = 0.0
+		return
+	
+	_shake_trauma = lerp(_shake_trauma, 0.0, 5.0 * real_delta)
+	if _shake_trauma < 0.01:
+		_shake_trauma = 0.0
+	
+	var intensity := _shake_trauma * _shake_trauma
+	_camera.h_offset = randf_range(-intensity, intensity) * 0.5
+	_camera.v_offset = randf_range(-intensity, intensity) * 0.5
 
 
 # ---------------------------------------------------------------------------
@@ -296,10 +337,6 @@ func _handle_movement(delta: float) -> void:
 		velocity.z = move_toward(velocity.z, 0.0, friction * delta)
 
 
-func _sync_aim() -> void:
-	pass
-
-
 # ---------------------------------------------------------------------------
 # Shooting & Recoil
 # ---------------------------------------------------------------------------
@@ -366,10 +403,12 @@ func _spawn_bullet() -> void:
 	
 	if bullet.has_method("initialize"):
 		bullet.initialize(shoot_dir, bullet_speed, self)
-
-
-func _on_hit() -> void:
-	emit_signal("hit_registered")
+	
+	# Muzzle flash
+	_muzzle_light.visible = true
+	_muzzle_particle.emitting = true
+	await get_tree().create_timer(0.05).timeout
+	_muzzle_light.visible = false
 
 
 func _get_recoil_strength() -> float:
@@ -505,6 +544,7 @@ func _try_activate_dash() -> void:
 	if _sword_slash:
 		_sword_slash.try_activate()
 	
+	_play_chroma()
 	emit_signal("dash_changed", true, 0.0)
  
  
@@ -519,7 +559,7 @@ func _update_dash(real_delta: float) -> void:
 				emit_signal("dash_changed", false, _dash_cooldown_timer / dash_cooldown)
 		return
 	
-	_dash_timer -= real_delta / Engine.time_scale
+	_dash_timer -= real_delta
 	if _dash_timer <= 0.0:
 		_end_dash()
 		return
@@ -534,6 +574,39 @@ func _end_dash() -> void:
 	# Restore layer 2 collision so player hits Destructibles again
 	collision_mask = collision_mask | (1 << 3)
 	emit_signal("dash_changed", false, 1.0)
+
+
+func _play_chroma() -> void:
+	var mat := _chroma_mesh.mesh.surface_get_material(0) as ShaderMaterial
+	if not mat:
+		return
+	if _tween_chroma:
+		_tween_chroma.kill()
+	_tween_chroma = create_tween()
+	_tween_chroma.tween_method(
+		func(v): mat.set_shader_parameter("aberration_strength", v),
+		0.0, 0.5, 0.05
+	).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	_tween_chroma.tween_method(
+		func(v): mat.set_shader_parameter("aberration_strength", v),
+		0.5, 0.0, 0.6
+	).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+
+
+# ---------------------------------------------------------------------------
+# Hit register
+# ---------------------------------------------------------------------------
+func _on_hit() -> void:
+	emit_signal("hit_registered")
+	_trigger_hit_stop()
+
+
+
+func _trigger_hit_stop(duration: float = 0.2) -> void:
+	var previous_scale = Engine.time_scale
+	Engine.time_scale = 0.0
+	var timer = get_tree().create_timer(duration, true, false, true)
+	timer.timeout.connect(func(): Engine.time_scale = previous_scale)
 
 
 # ---------------------------------------------------------------------------

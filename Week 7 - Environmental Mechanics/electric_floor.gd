@@ -82,7 +82,9 @@ func _setup_arc_mesh() -> void:
 
 # ---------------------------------------------------------------------------
 func _process(delta: float) -> void:
-	var real_delta := delta / Engine.time_scale
+	if Engine.time_scale == 0.0:
+		return
+	var real_delta: float = delta / Engine.time_scale if Engine.time_scale > 0.0 else 0.0
 	_timer += real_delta
 	
 	var warning_start := zap_interval - warning_duration
@@ -230,6 +232,8 @@ func _zap() -> void:
 	# Damage player if inside
 	if _player and _player.has_method("take_hit"):
 		_player.take_hit(damage)
+	if _player and _player.has_method("add_trauma"):
+		_player.add_trauma(0.5)
 	
 	_particles.restart()
 	

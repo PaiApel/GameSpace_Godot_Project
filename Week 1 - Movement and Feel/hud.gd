@@ -34,6 +34,16 @@ extends CanvasLayer
 @onready var _health_bar: ProgressBar = %HealthBar
 
 # ---------------------------------------------------------------------------
+# Node refs Screen Flash
+# ---------------------------------------------------------------------------
+@onready var _damage_flash: ColorRect = $DamageFlash
+
+# ---------------------------------------------------------------------------
+# Node refs Vignette
+# ---------------------------------------------------------------------------
+@onready var _vignette_rect: ColorRect = $VignetteRect
+
+# ---------------------------------------------------------------------------
 # Crosshair shader constants
 # ---------------------------------------------------------------------------
 const GUN_CIRCLE_RADIUS: float = 0.25
@@ -71,6 +81,15 @@ const COLOR_BORDER_ACTIVE: Color = Color(0.22, 0.55, 0.95, 0.85)
 const COLOR_BORDER_INACTIVE: Color = Color(1.0,  1.0,  1.0,  0.18)
 const COLOR_SLASH_ACTIVE: Color = Color(1.0,  0.85, 0.35, 1.0)
 
+# ---------------------------------------------------------------------------
+# Heartbeat constants
+# ---------------------------------------------------------------------------
+const HEARTBEAT_THRESHOLD: float = 0.30
+const HEARTBEAT_MIN_STRENGTH: float = 0.25
+const HEARTBEAT_MAX_STRENGTH: float = 0.85
+const HEARTBEAT_SLOW_BEAT: float = 0.6
+const HEARTBEAT_FAST_BEAT: float = 0.15
+
 # Internal state
 var _current_weapon: int  = 0
 var _triple_active: bool = false
@@ -79,6 +98,8 @@ var _tween_crosshair: Tween = null
 var _tween_hit: Tween = null
 var _tween_slot_gun: Tween = null
 var _tween_slot_sword: Tween = null
+var _tween_heartbeat: Tween = null
+var _heartbeat_active: bool = false
 
 func _ready() -> void:
 	var player: Player = get_tree().get_first_node_in_group("player")
@@ -108,6 +129,8 @@ func _ready() -> void:
 	_slowmo_bar.value = 100.0
 	_gun_reload_bar.value = 0.0
 	_gun_reload_bar.visible = false
+	
+	_set_vignette_strength(0.0)
 
 
 # ---------------------------------------------------------------------------
@@ -231,9 +254,9 @@ func _on_triple_changed(active: bool, loaded: int, cooldown_ratio: float) -> voi
 	var mat := _crosshair.material as ShaderMaterial
 	var color := COLOR_GOLD if active else COLOR_WHITE
 	if mat:
-			mat.set_shader_parameter("circle_color_main", color)
-			mat.set_shader_parameter("cross_color_main", color)
-			mat.set_shader_parameter("dot_color", color)
+		mat.set_shader_parameter("circle_color_main", color)
+		mat.set_shader_parameter("cross_color_main", color)
+		mat.set_shader_parameter("dot_color", color)
 	if active or cooldown_ratio >= 1.0:
 		_gun_skill_bar.value = 100.0
 	else:
@@ -348,5 +371,73 @@ func _on_hit_registered() -> void:
 # Health
 # ---------------------------------------------------------------------------
 func _on_health_changed(current: float, max_hp: float) -> void:
+	if current < _health_bar.value:
+		_flash_damage()
 	_health_bar.max_value = max_hp
 	_health_bar.value = current
+	_update_heartbeat(current, max_hp)
+
+
+# ---------------------------------------------------------------------------
+# Screen flash
+# ---------------------------------------------------------------------------
+func _flash_damage() -> void:
+	_damage_flash.modulate.a = 0.4
+	create_tween().tween_property(_damage_flash, "modulate:a", 0.0, 0.15)
+
+
+# ---------------------------------------------------------------------------
+# Heartbeat vignette
+# ---------------------------------------------------------------------------
+func _set_vignette_strength(strength: float) -> void:
+	var mat := _vignette_rect.material as ShaderMaterial
+	if mat:
+		mat.set_shader_parameter("pulse_strength", strength)
+
+
+func _update_heartbeat(current: float, max_hp: float) -> void:
+	var ratio: float = current / max_hp if max_hp > 0.0 else 0.0
+	
+	if ratio >= HEARTBEAT_THRESHOLD:
+		# HP recovered above threshold, stop and fade out
+		if _heartbeat_active:
+			_heartbeat_active = false
+			if _tween_heartbeat:
+				_tween_heartbeat.kill()
+			_tween_heartbeat = create_tween()
+			_tween_heartbeat.tween_method(_set_vignette_strength, _get_vignette_strength(), 0.0, 0.4) \
+				.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+		return
+	
+	# How far into the danger zone: 0.0 at threshold, 1.0 at 0 HP
+	var danger: float = 1.0 - (ratio / HEARTBEAT_THRESHOLD)
+	var peak_strength: float = lerpf(HEARTBEAT_MIN_STRENGTH, HEARTBEAT_MAX_STRENGTH, danger)
+	var beat_time: float = lerpf(HEARTBEAT_SLOW_BEAT, HEARTBEAT_FAST_BEAT, danger)
+	
+	if _tween_heartbeat and _tween_heartbeat.is_running():
+		return
+	
+	_heartbeat_active = true
+	if _tween_heartbeat:
+		_tween_heartbeat.kill()
+	
+	# Single pulse: fade in to peak, fade out to zero, then loop via finished signal
+	_tween_heartbeat = create_tween()
+	_tween_heartbeat.tween_method(_set_vignette_strength, 0.0, peak_strength, beat_time) \
+		.set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_SINE)
+	_tween_heartbeat.tween_method(_set_vignette_strength, peak_strength, 0.0, beat_time) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+	# Gap between beats, shorter at lower HP
+	_tween_heartbeat.tween_interval(beat_time * 0.5)
+	_tween_heartbeat.tween_callback(func():
+		if _heartbeat_active:
+			_tween_heartbeat = null
+			_on_health_changed(_health_bar.value, _health_bar.max_value)
+	)
+
+
+func _get_vignette_strength() -> float:
+	var mat := _vignette_rect.material as ShaderMaterial
+	if mat:
+		return mat.get_shader_parameter("pulse_strength")
+	return 0.0
